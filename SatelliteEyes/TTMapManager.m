@@ -64,6 +64,11 @@
                                                 forKeyPath:@"selectedImageEffectId"
                                                    options:NSKeyValueObservingOptionNew
                                                    context:nil];
+		
+		[[NSUserDefaults standardUserDefaults] addObserver:self
+												forKeyPath:@"sameOnAllScreens"
+												   options:NSKeyValueObservingOptionNew
+												   context:nil];
 
         [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self 
                                                                selector:@selector(spaceChanged:) 
@@ -234,12 +239,20 @@
     float mainScreenTileWidth = NSWidth(mainScreenFrame)/BASE_TILE_SIZE;
     float mainScreenTileOriginX = centerTile.x - mainScreenTileWidth/2;
     float mainScreenTileOriginY = centerTile.y + mainScreenTileHeight/2;
-    
-    // Calculate the size and origin of the target screen in tiles, offset from the main screen centre point
-    float targetScreenTileHeight = NSHeight(targetScreenFrame)/BASE_TILE_SIZE;
-    float targetScreenTileWidth = NSWidth(targetScreenFrame)/BASE_TILE_SIZE;
-    float targetScreenTileOriginX = mainScreenTileOriginX + targetScreenFrame.origin.x/BASE_TILE_SIZE;
-    float targetScreenTileOriginY = mainScreenTileOriginY - targetScreenFrame.origin.y/BASE_TILE_SIZE;
+	
+	BOOL sameOnAllScreens = [[NSUserDefaults standardUserDefaults] boolForKey:@"sameOnAllScreens"];
+	
+	// Calculate the size and origin of the target screen in tiles
+	float targetScreenTileHeight = NSHeight(targetScreenFrame)/BASE_TILE_SIZE;
+	float targetScreenTileWidth = NSWidth(targetScreenFrame)/BASE_TILE_SIZE;
+	float targetScreenTileOriginX = mainScreenTileOriginX;
+	float targetScreenTileOriginY = mainScreenTileOriginY;
+	
+	// Add the offset to the centre point if the image is supposed to be different on both screens
+	if (!sameOnAllScreens) {
+		targetScreenTileOriginX += targetScreenFrame.origin.x/BASE_TILE_SIZE;
+		targetScreenTileOriginY -= targetScreenFrame.origin.y/BASE_TILE_SIZE;
+	}
     
     return CGRectMake(targetScreenTileOriginX, targetScreenTileOriginY, targetScreenTileWidth, targetScreenTileHeight);
 }
@@ -437,6 +450,7 @@
     [[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:@"selectedMapTypeIndex"];
     [[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:@"zoomLevel"];
     [[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:@"selectedImageEffectId"];
+	[[NSUserDefaults standardUserDefaults] removeObserver:self forKeyPath:@"sameOnAllScreens"];
     [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
 }
 

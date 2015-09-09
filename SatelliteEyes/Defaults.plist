@@ -484,5 +484,7 @@
 	<string>stamen-watercolor</string>
 	<key>cleanCache</key>
 	<true/>
+	<key>sameOnAllScreens</key>
+	<false/>
 </dict>
 </plist>
